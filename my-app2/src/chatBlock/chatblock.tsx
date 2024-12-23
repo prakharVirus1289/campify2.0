@@ -20,6 +20,7 @@ export default function ChatBlock({title, description, code_, media, id}: ChatBl
 
   const navigate = useNavigate();
   const {sessionId} = useParams();
+  const {subjectId} = useParams();
   const {user} = useContext(SessionContext);
 
   if ((sessionId !== user?.id)) {
@@ -28,7 +29,7 @@ export default function ChatBlock({title, description, code_, media, id}: ChatBl
 
   const handleClick = () => {
     console.log('clicked');
-    navigate(`/${sessionId}/${id}/thread`, {state: {title: title, description: description, code_: code_, media: media}});
+    navigate(`/${sessionId}/${subjectId}/${id}/thread`, {state: {title: title, description: description, code_: code_, media: media}});
   }
 
   return (

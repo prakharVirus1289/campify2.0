@@ -1,19 +1,27 @@
-import { messagesAtom } from "../atom/messagesAtom";
 import { useRecoilValue } from "recoil";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useId } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {SessionContext} from '../context/userSessions';
 import { useContext } from "react";
-import Logout from '../components2/logout';
+import Chatblock from '../chatBlock/chatblock';
 
+import Layout from "../layout/layout";
+import { subjectsAtom } from "../atom/subject";
+import { mainMessagesAtom } from "../atom/mainMessage";
 export default function CommunityChat() {
-    
-    const messages = useRecoilValue(messagesAtom);
-    const messages_ = messages.messages;
+
+    const subjects = useRecoilValue(subjectsAtom);
+    const messages = useRecoilValue(mainMessagesAtom);
     const navigate = useNavigate();
-    const {sessionId} = useParams();
+    const {subjectId, sessionId} = useParams();
     const {user} = useContext(SessionContext);
+
+    let messagesIds: string[] = [];
+    
+    if (subjectId) {
+        messagesIds = subjects[subjectId].subjectMessages;
+    }
 
     useEffect(() => {
         if ((sessionId !== user?.id)) {
@@ -22,23 +30,22 @@ export default function CommunityChat() {
     }, [user, sessionId]);
 
     const addMessage = () => {
-        navigate(`/${sessionId}/${user?.id}/input`);
+        navigate(`/${sessionId}/${subjectId}/input`);
     }
 
     return (
-        <div className="h-[100vh] w-[90vw] flex flex-col overflow-y-auto">
-            <button onClick={addMessage} className="fixed top-[12.5vh] left-[90vw] bg-blue-500 text-white p-2 rounded-md">
-                <div>add message</div>
-            </button>
-            <div className="absolute top-[5vh] left-[5vw] w-[70vw] h-[80vh]">
-                {messages_.map((msg) => {
-                    const id = useId();
-                    return (<div key={id}>{msg}</div>)
-                })}
+        <Layout>
+            <div className="h-[100%] w-[100%] flex flex-col">
+                <button onClick={addMessage} className="fixed top-[12.5vh] left-[90vw] bg-blue-500 text-white p-2 rounded-md">
+                    <div>add message</div>
+                </button>
+                <div className="absolute top-[5vh] left-[5vw] w-[70vw] h-[80vh]">
+                    {messagesIds.map((messageId) => {
+                        const message = messages[messageId];
+                        return (<Chatblock key={messageId} title={message.title} description={message.description} code_={message.code} media={message.media} id={messageId}/>)
+                    })}
+                </div>
             </div>
-            <div className="absolute top-[80vh] left-[80vw]">
-                <Logout/>
-            </div>
-        </div>
+        </Layout>
     );
 }

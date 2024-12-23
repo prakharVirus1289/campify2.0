@@ -27,7 +27,7 @@ export default function FileUploadComponent({setValue}: MyComponentProps){
   };
 
   return (
-    <div className='absolute top-[35vh] left-[0] h-[300px]'>
+    <div className='absolute top-[35vh] left-[0] h-[250px]'>
       <input type="file" onChange={onFileChange} className='w-[700px] h-[50px] border-2 border-gray-300 rounded-md p-2' />
       {file && (  
         <FileViewer
