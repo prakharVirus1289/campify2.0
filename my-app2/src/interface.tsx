@@ -15,8 +15,7 @@ export interface MessageThread {
     threadId: string;
     messageId: string;
     subjectId: string;
-    title: string;
-    description: string;
+    content: string;
     code: code;
     media: File | null;
     createdby: profile;

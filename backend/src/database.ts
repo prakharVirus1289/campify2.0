@@ -2,8 +2,12 @@ import { PrismaClient } from '@prisma/client';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
+import User from './mongoDB/user';
+import connectDB from './mongoDB/db';
 
 const app = express();
+
+connectDB();
 
 const upload = multer({storage: multer.memoryStorage()})
 
@@ -68,3 +72,22 @@ app.post('/m_messages', upload.single('media'), async (req, res) => {
 //   .finally(async () => {
 //     await prisma.$disconnect();
 //   });
+
+app.post('/messagepost', upload.single('file'), async (req, res) => {
+  // const {message} = req.body;
+  console.log(req.file);
+  console.log(req.body);
+  const user = new User({
+    message: req.body.message,
+    data: req.file?.buffer
+  });
+  console.log(user);
+  await user.save();
+  res.json(user);
+});
+
+app.get('/messageget', async (req, res) => {
+  const users = await User.find({});
+  console.log(users);
+  res.json(users);
+});

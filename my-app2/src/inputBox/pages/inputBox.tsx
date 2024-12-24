@@ -94,7 +94,7 @@ export default function InputBox() {
         ...prevSubjects,
         [subjectId]: {
           ...prevSubjects[subjectId],
-          subjectMessages: [...prevSubjects[subjectId].subjectMessages, newMessage.messageId]
+          subjectMessages: [newMessage.messageId,...prevSubjects[subjectId].subjectMessages]
         }
       }));
     }

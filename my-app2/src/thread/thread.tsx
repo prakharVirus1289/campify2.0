@@ -3,16 +3,23 @@ import CodeInputBox from '../thread/codeview';
 import {useLocation} from 'react-router-dom';
 import {useNavigate, useParams} from 'react-router-dom';
 import {SessionContext} from '../context/userSessions';
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import Layout from '../layout/layout';
+import { useRecoilState } from 'recoil';
+import { mainMessagesAtom } from '../atom/mainMessage';
+import { MessageThread, profile } from '../interface';
+import { threadMessagesAtom } from '../atom/threadMessage';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function Thread() {
     
-    const {sessionId} = useParams();
+    const {sessionId, subjectId, messageId} = useParams();
     const {user} = useContext(SessionContext);
+    const [mainMessages, setMainMessages] = useRecoilState(mainMessagesAtom);
+    const [threadMessages, setThreadMessages] = useRecoilState(threadMessagesAtom);
+    const [message, setMessage] = useState('');
+    const [file, setFile] = useState<File | null>(null);
     const navigate = useNavigate();
-
-    // http://localhost:5173/063b0bf0-de54-4358-84e0-8e1ea2b13716
 
     useEffect(() => {
         if ((sessionId !== user?.id)) {
@@ -22,6 +29,50 @@ export default function Thread() {
 
     const location = useLocation();
     const {title, description, code_, media} = location.state;
+
+    let threadIDs: string[] = [];
+    if (messageId) {
+        threadIDs = mainMessages[messageId].threads;
+    }
+
+    const userProfile: profile = {
+        first_name: user?.first_name || '',
+        last_name: user?.last_name || '',
+        email: user?.email || '',
+        id: user?.id || '',
+        image: user?.image || null,
+    };
+
+    const handleAdd = () => {
+        const newThread: MessageThread = {
+            threadId: uuidv4(),
+            messageId: messageId || '',
+            subjectId: subjectId || '',
+            code: {
+                lang: 'javascript',
+                code:  '',
+            },
+            content: message,
+            media: file || null,
+            createdby: userProfile,
+            createdon: new Date().toISOString(),
+        };
+
+        setThreadMessages((prevThreadMessages) => ({
+            ...prevThreadMessages,
+            [newThread.threadId]: newThread,
+        }));
+
+        if (messageId) {
+            setMainMessages((prevMainMessages) => ({
+                ...prevMainMessages,
+                [messageId]: {
+                    ...prevMainMessages[messageId],
+                    threads: [newThread.threadId, ...prevMainMessages[messageId].threads],
+                },
+            }));
+        }
+    }
 
     return (
         <Layout>
@@ -40,12 +91,22 @@ export default function Thread() {
                         <FileUploadComponent object={media} />
                     </div>)}
                 </div>
-                <div className="flex p-20 border-[1px] border-solid border-black gap-2 justify-center">
+                <div id="input-box" className="flex flex-col p-10 border-[1px] border-solid border-black gap-10 justify-center">
                     <h1 className="text-2xl font-bold text-center">Input your comment</h1>
-                    <div className="relative top-[70%] flex flex-col border-[1px] border-solid border-black p-2 rounded-md">
-                        <input type="text" placeholder="Add a comment" className="border-[1px] border-solid border-black p-2 rounded-md" />
-                        <button className="bg-blue-500 text-white p-2 rounded-md">Add</button>
+                    <div className="flex flex-col h-[400px] border-[1px] border-solid border-black p-2 rounded-md">
+                        <textarea value={message} onChange={(e)=>setMessage(e.target.value)} placeholder="Add a comment" className="border-[1px] border-solid border-black p-2 rounded-md h-[75%] w-[100%]" />
+                        <input type="file" onChange={(e)=>setFile(e.target.files?.[0] || null)} className="border-[1px] border-solid border-black p-2 rounded-md h-[15%] w-[100%]" />
+                        <button onClick={handleAdd} className="bg-blue-500 text-white p-2 rounded-md h-[10%] w-[100%]">Add</button>
                     </div>
+                </div>
+                <div className="flex flex-col p-10 border-[1px] border-solid border-black gap-10 justify-center">
+                    <h1 className="text-2xl font-bold text-center">Comments</h1>
+                    {threadIDs.map((threadId) => {
+                        const thread = threadMessages[threadId];
+                        return (<div key={threadId}>
+                            <p>{thread.content}</p>
+                        </div>)
+                    })}
                 </div>
             </div>
         </Layout>
