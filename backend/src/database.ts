@@ -1,28 +1,30 @@
 import express from 'express';
-import multer from 'multer';
+// import multer from 'multer';
 // import Subject from './mongoDB/subject';
 import connectDB from './mongoDB/db';
 import http from 'http'
 import SocketService from './socketIO/socket';
+import { startMessageConsumer } from './kafka/kafka';
 
 const app = express();
 
 connectDB();
 
-const upload = multer({storage: multer.memoryStorage()})
+// const upload = multer({storage: multer.memoryStorage()})
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 async function init() {
+  startMessageConsumer();
   const socketService = new SocketService();
-
+  
   const httpserver = http.createServer();
   const PORT = 3000;
 
   socketService.Io.attach(httpserver);
   httpserver.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`database: Server is running on port ${PORT}`);
   });
 
   socketService.initListener();

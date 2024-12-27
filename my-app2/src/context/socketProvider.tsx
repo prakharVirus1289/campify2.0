@@ -155,6 +155,7 @@ export const SocketProvider: React.FC<ProviderProps> = ({children}) => {
     useEffect(() => {
         const _socket = io('http://localhost:3000');
         _socket.on('event:message', onMessageRec);
+        _socket.emit('event:getMessages', {message: "hello"});
         setSocket(_socket);
 
         return () => {
