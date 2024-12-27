@@ -7,19 +7,21 @@ import { useContext, useEffect, useState } from "react";
 import Layout from '../layout/layout';
 import { useRecoilState } from 'recoil';
 import { mainMessagesAtom } from '../atom/mainMessage';
-import { MessageThread, profile } from '../interface';
+// import { MessageThread, profile } from '../interface';
 import { threadMessagesAtom } from '../atom/threadMessage';
 import { v4 as uuidv4 } from 'uuid';
+import { SocketContextType, useSocket } from '../context/socketProvider';
 
 export default function Thread() {
     
-    const {sessionId, subjectId, messageId} = useParams();
+    const {sessionId, messageId, subjectId} = useParams();
     const {user} = useContext(SessionContext);
-    const [mainMessages, setMainMessages] = useRecoilState(mainMessagesAtom);
-    const [threadMessages, setThreadMessages] = useRecoilState(threadMessagesAtom);
+    const [mainMessages] = useRecoilState(mainMessagesAtom);
+    const [threadMessages] = useRecoilState(threadMessagesAtom);
     const [message, setMessage] = useState('');
     const [file, setFile] = useState<File | null>(null);
     const navigate = useNavigate();
+    const {sendMessageThread}: SocketContextType = useSocket();
 
     useEffect(() => {
         if ((sessionId !== user?.id)) {
@@ -35,43 +37,44 @@ export default function Thread() {
         threadIDs = mainMessages[messageId].threads;
     }
 
-    const userProfile: profile = {
-        first_name: user?.first_name || '',
-        last_name: user?.last_name || '',
-        email: user?.email || '',
-        id: user?.id || '',
-        image: user?.image || null,
-    };
+    // const userProfile: profile = {
+    //     first_name: user?.first_name || '',
+    //     last_name: user?.last_name || '',
+    //     email: user?.email || '',
+    //     id: user?.id || '',
+    //     image: user?.image || null,
+    // };
 
     const handleAdd = () => {
-        const newThread: MessageThread = {
+
+        const newThread: any = {
             threadId: uuidv4(),
-            messageId: messageId || '',
-            subjectId: subjectId || '',
-            code: {
-                lang: 'javascript',
-                code:  '',
-            },
+            messageId: messageId,
+            subjectId: subjectId,
             content: message,
+            codeData: "",
+            codeLanguage: "javascript",
             media: file || null,
-            createdby: userProfile,
+            createdby: "user",
             createdon: new Date().toISOString(),
         };
 
-        setThreadMessages((prevThreadMessages) => ({
-            ...prevThreadMessages,
-            [newThread.threadId]: newThread,
-        }));
+        sendMessageThread(newThread);
 
-        if (messageId) {
-            setMainMessages((prevMainMessages) => ({
-                ...prevMainMessages,
-                [messageId]: {
-                    ...prevMainMessages[messageId],
-                    threads: [newThread.threadId, ...prevMainMessages[messageId].threads],
-                },
-            }));
-        }
+        // setThreadMessages((prevThreadMessages) => ({
+        //     ...prevThreadMessages,
+        //     [newThread.threadId]: newThread,
+        // }));
+
+        // if (messageId) {
+        //     setMainMessages((prevMainMessages) => ({
+        //         ...prevMainMessages,
+        //         [messageId]: {
+        //             ...prevMainMessages[messageId],
+        //             threads: [newThread.threadId, ...prevMainMessages[messageId].threads],
+        //         },
+        //     }));
+        // }
     }
 
     return (

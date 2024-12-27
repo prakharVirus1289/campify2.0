@@ -12,7 +12,7 @@ interface ChatBlockProps {
     title: string;
     description: string;
     code_: code;
-    media: File | null;
+    media: Blob | null;
     id: string;
 }
 

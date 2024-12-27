@@ -13,11 +13,9 @@ export interface profile {
 
 export interface MessageThread {
     threadId: string;
-    messageId: string;
-    subjectId: string;
     content: string;
     code: code;
-    media: File | null;
+    media: Blob | null;
     createdby: profile;
     createdon: string;
 }
@@ -27,7 +25,7 @@ export interface MessageMain {
     title: string;
     description: string;
     code: code;
-    media: File | null;
+    media: Blob | null;
     createdby: profile;
     createdon: string;
     threads: string[];
@@ -38,7 +36,7 @@ export interface subject {
     subjectName: string;
     subjectDescription: string;
     subjectCode: string;
-    subjectMedia: File | null;
+    subjectMedia: Blob | null;
     subjectCreatedby: profile;
     subjectCreatedon: string;
     subjectMessages: string[];

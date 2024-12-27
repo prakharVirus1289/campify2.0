@@ -1,14 +1,16 @@
 import FileViewer from 'react-file-viewer';
 
-interface MyComponentProps {
-    object: File | null;
-}
+// interface MyComponentProps {
+//     object: Blob | null;
+// }
 
-export default function FileUploadComponent({object}: MyComponentProps){
+export default function FileUploadComponent({object}: any){
 
   const onError = (e: any) => {
     console.error("Error loading the file:", e);
   };
+
+  console.log("object", object);
 
   return (
     <div id="file-container" className="flex flex-col items-left justify-left overflow-y-auto h-[200px] w-[700px]">

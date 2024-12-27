@@ -2,17 +2,19 @@ import {useEffect, useState } from 'react';
 import CodeInputBox from '../components/CodeEditor';
 import CustomTextEditor from '../components/TextEditor';
 import FileUploadComponent from '../components/fileViewer';
-import {mainMessagesAtom} from '../../atom/mainMessage';
-import {useSetRecoilState} from 'recoil';
+// import {mainMessagesAtom} from '../../atom/mainMessage';
+// import {useSetRecoilState} from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import Layout from "../../layout/layout";
 import { useParams } from 'react-router-dom';
 import {SessionContext} from '../../context/userSessions';
 import { useContext } from 'react';
 import { uid } from 'uid';
-import { MessageMain, profile} from '../../interface';
-import { subjectsAtom } from '../../atom/subject';
-import { useRecoilState } from 'recoil';
+// import { MessageMain, profile} from '../../interface';
+// import { subjectsAtom } from '../../atom/subject';
+// import { useRecoilState } from 'recoil';
+import { SocketContextType, useSocket } from '../../context/socketProvider';
+
 interface code {
   lang: string;
   code: string;
@@ -24,12 +26,12 @@ export default function InputBox() {
   const [description, setDescription] = useState<string>('');
   const [code, setCode] = useState<code>({lang: 'javascript', code: ''});
   const [media, setMedia] = useState<File | null>(null);
-  const setMessages = useSetRecoilState(mainMessagesAtom);
-  const [subjects, setSubjects] = useRecoilState(subjectsAtom);
+  // const [subjects] = useRecoilState(subjectsAtom);
   const navigate = useNavigate();
   const {subjectId, sessionId} = useParams();
   const {user} = useContext(SessionContext);
-
+  const {sendMessageMain}: SocketContextType = useSocket();
+  
   useEffect(() => {
     if ((sessionId !== user?.id)) {
       navigate('/login');
@@ -62,42 +64,45 @@ export default function InputBox() {
     //   body: formData,
     // });
 
-    const profile: profile = {
-      first_name: user?.first_name || '',
-      last_name: user?.last_name || '',
-      email: user?.email || '',
-      id: user?.id || '',
-      image: user?.image || null
-    }
+    // const profile: profile = {
+    //   first_name: user?.first_name || '',
+    //   last_name: user?.last_name || '',
+    //   email: user?.email || '',
+    //   id: user?.id || '',
+    //   image: user?.image || null
+    // }
     
-    const newMessage: MessageMain = {
+    const newMessage: any = {
       messageId: id_,
+      subjectId: subjectId,
       title: title,
       description: description,
-      code: code,
+      codeData: code.code,
+      codeLanguage: code.lang,
       media: media,
-      createdby: profile,
+      createdby: "user",
       createdon: new Date().toISOString(),
-      threads: []
     };
 
-    setMessages((prevMessages) => ({
-      ...prevMessages,
-      [newMessage.messageId]: newMessage
-    }));
+    sendMessageMain(newMessage);
 
-    console.log(subjects);
-    console.log(subjectId);
+    // setMessages((prevMessages) => ({
+    //   ...prevMessages,
+    //   [newMessage.messageId]: newMessage
+    // }));
 
-    if (subjectId) {
-      setSubjects((prevSubjects) => ({
-        ...prevSubjects,
-        [subjectId]: {
-          ...prevSubjects[subjectId],
-          subjectMessages: [newMessage.messageId,...prevSubjects[subjectId].subjectMessages]
-        }
-      }));
-    }
+    // console.log(subjects);
+    // console.log(subjectId);
+
+    // if (subjectId) {
+    //   setSubjects((prevSubjects) => ({
+    //     ...prevSubjects,
+    //     [subjectId]: {
+    //       ...prevSubjects[subjectId],
+    //       subjectMessages: [newMessage.messageId,...prevSubjects[subjectId].subjectMessages]
+    //     }
+    //   }));
+    // }
 
     navigate(`/${sessionId}/${subjectId}`);
   }

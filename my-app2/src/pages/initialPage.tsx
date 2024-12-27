@@ -6,12 +6,13 @@ import {useParams} from 'react-router-dom';
 import Layout from '../layout/layout';
 import {useRecoilState} from 'recoil';
 import {subjectsAtom} from '../atom/subject';
-import {profile, subject} from '../interface';
+// import {profile, subject} from '../interface';
+import { SocketContextType, useSocket } from '../context/socketProvider';
 
 export default function InitialPage() {
 
     const navigate = useNavigate();
-    
+    const {sendSubject}: SocketContextType = useSocket();
     const [subjects, setSubjects] = useRecoilState(subjectsAtom);
     const {user} = useContext(SessionContext);
     const {sessionId} = useParams();
@@ -30,45 +31,18 @@ export default function InitialPage() {
         setBlur(!blur);
 
         const id_ = uid(); //subjectID genration
-
-        //adding data to the database
-        // fetch('http://localhost:3000/subjects', {
-        //     method: 'POST',
-        //     body: JSON.stringify({
-        //         id: id_,
-        //         name: "New Subject", 
-        //         createdBy: user?.email, 
-        //         description: "New Subject"
-        //     }),
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     }
-        // });
-
-        const profile: profile = {
-            first_name: user?.first_name || '',
-            last_name: user?.last_name || '',
-            email: user?.email || '',
-            id: user?.id || '',
-            image: user?.image || null
-        }
         
-        const newSubject: subject = {
+        const newSubject: any = {
             subjectId: id_,
             subjectName: subjectName,
-            subjectCreatedby: profile,
-            subjectCreatedon: new Date().toISOString(),
-            subjectMessages: [],
-            subjectMedia: null,
             subjectDescription: subjectDescription,
-            subjectCode: "New Subject"
+            subjectCode: "New Subject",
+            subjectMedia: null,
+            subjectCreatedby: "user",
+            subjectCreatedon: new Date().toISOString(),            
         }
 
-        setSubjects((prevSubjects) => ({
-            ...prevSubjects,
-            [id_]: newSubject
-        }));
-
+        sendSubject(newSubject);
         setSubjectName('');
         setSubjectDescription('');
     }

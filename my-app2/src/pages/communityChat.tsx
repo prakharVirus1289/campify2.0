@@ -23,6 +23,8 @@ export default function CommunityChat() {
         messagesIds = subjects[subjectId].subjectMessages;
     }
 
+    console.log(messagesIds);
+
     useEffect(() => {
         if ((sessionId !== user?.id)) {
           navigate('/login');

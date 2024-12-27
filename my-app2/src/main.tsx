@@ -5,14 +5,17 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { RecoilRoot } from 'recoil';
+import { SocketProvider } from './context/socketProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RecoilRoot>
       <SessionProvider>
-        <Router>
-          <App/>
-        </Router>
+        <SocketProvider>
+          <Router>
+            <App/>
+          </Router>
+        </SocketProvider>
       </SessionProvider>
     </RecoilRoot>
   </StrictMode>,
