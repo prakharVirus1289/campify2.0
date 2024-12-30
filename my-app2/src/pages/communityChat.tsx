@@ -9,30 +9,38 @@ import Chatblock from '../chatBlock/chatblock';
 import Layout from "../layout/layout";
 import { subjectsAtom } from "../atom/subject";
 import { mainMessagesAtom } from "../atom/mainMessage";
+
 export default function CommunityChat() {
 
     const subjects = useRecoilValue(subjectsAtom);
     const messages = useRecoilValue(mainMessagesAtom);
     const navigate = useNavigate();
-    const {subjectId, sessionId} = useParams();
+    const {subjectId} = useParams();
     const {user} = useContext(SessionContext);
 
     let messagesIds: string[] = [];
     
+    console.log("[communityChat]: subjects-", subjects);
+
     if (subjectId) {
+        console.log("[communityChat]: subjects[subjectId]-", subjects[subjectId]);
         messagesIds = subjects[subjectId].subjectMessages;
+        console.log("[communityChat]: messagesIds-", messagesIds);
     }
 
     console.log(messagesIds);
 
     useEffect(() => {
-        if ((sessionId !== user?.id)) {
+        if ((localStorage.getItem('sessionId') !== user?.id)) {
+            console.log("[communityChat]: not logged in");
+            console.log("[communityChat]: sessionId-", localStorage.getItem('sessionId'));
+            console.log("[communityChat]: user-", user?.id);
           navigate('/login');
         }
-    }, [user, sessionId]);
+    }, [user]);
 
     const addMessage = () => {
-        navigate(`/${sessionId}/${subjectId}/input`);
+        navigate(`/${subjectId}/input`);
     }
 
     return (
@@ -44,7 +52,7 @@ export default function CommunityChat() {
                 <div className="absolute top-[5vh] left-[5vw] w-[70vw] h-[80vh]">
                     {messagesIds.map((messageId) => {
                         const message = messages[messageId];
-                        return (<Chatblock key={messageId} title={message.title} description={message.description} code_={message.code} media={message.media} id={messageId}/>)
+                        return (<Chatblock key={messageId} title={message.title} description={message.description} id={messageId}/>)
                     })}
                 </div>
             </div>

@@ -1,6 +1,5 @@
 import FileUploadComponent from '../thread/fileview';
 import CodeInputBox from '../thread/codeview';
-import {useLocation} from 'react-router-dom';
 import {useNavigate, useParams} from 'react-router-dom';
 import {SessionContext} from '../context/userSessions';
 import { useContext, useEffect, useState } from "react";
@@ -14,7 +13,7 @@ import { SocketContextType, useSocket } from '../context/socketProvider';
 
 export default function Thread() {
     
-    const {sessionId, messageId, subjectId} = useParams();
+    const {messageId, subjectId} = useParams();
     const {user} = useContext(SessionContext);
     const [mainMessages] = useRecoilState(mainMessagesAtom);
     const [threadMessages] = useRecoilState(threadMessagesAtom);
@@ -24,13 +23,12 @@ export default function Thread() {
     const {sendMessageThread}: SocketContextType = useSocket();
 
     useEffect(() => {
-        if ((sessionId !== user?.id)) {
+        if ((localStorage.getItem('sessionId') !== user?.id)) {
             navigate('/login');
         }
-    }, [user, sessionId]);
+    }, [user]);
 
-    const location = useLocation();
-    const {title, description, code_, media} = location.state;
+    const {title, description, code, media} = mainMessages[messageId as string];
 
     let threadIDs: string[] = [];
     if (messageId) {
@@ -87,8 +85,8 @@ export default function Thread() {
                     <div className="w-[50vw] flex justify-center items-center">
                         <div dangerouslySetInnerHTML={{ __html: description }} />
                     </div>
-                    {code_ && (<div className="flex justify-center items-center">
-                        <CodeInputBox input={code_} />
+                    {code && (<div className="flex justify-center items-center">
+                        <CodeInputBox input={code} />
                     </div>)}
                     {media && (<div className="flex flex-col justify-center items-center">
                         <FileUploadComponent object={media} />

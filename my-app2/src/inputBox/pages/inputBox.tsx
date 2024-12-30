@@ -28,15 +28,15 @@ export default function InputBox() {
   const [media, setMedia] = useState<File | null>(null);
   // const [subjects] = useRecoilState(subjectsAtom);
   const navigate = useNavigate();
-  const {subjectId, sessionId} = useParams();
+  const {subjectId} = useParams();
   const {user} = useContext(SessionContext);
   const {sendMessageMain}: SocketContextType = useSocket();
   
   useEffect(() => {
-    if ((sessionId !== user?.id)) {
+    if ((localStorage.getItem('sessionId') !== user?.id)) {
       navigate('/login');
     }
-  }, [user, sessionId]);
+  }, [user]);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -104,7 +104,7 @@ export default function InputBox() {
     //   }));
     // }
 
-    navigate(`/${sessionId}/${subjectId}`);
+    navigate(`/${subjectId}/community`);
   }
 
   return (

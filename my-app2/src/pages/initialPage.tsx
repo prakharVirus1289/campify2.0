@@ -2,7 +2,6 @@ import {v4 as uid} from 'uuid';
 import { useNavigate } from 'react-router-dom';
 import { useContext, useState, useEffect } from 'react';
 import { SessionContext } from '../context/userSessions';
-import {useParams} from 'react-router-dom';
 import Layout from '../layout/layout';
 import {useRecoilState} from 'recoil';
 import {subjectsAtom} from '../atom/subject';
@@ -15,17 +14,16 @@ export default function InitialPage() {
     const {sendSubject}: SocketContextType = useSocket();
     const [subjects, setSubjects] = useRecoilState(subjectsAtom);
     const {user} = useContext(SessionContext);
-    const {sessionId} = useParams();
 
     const [blur, setBlur] = useState(false);
     const [subjectName, setSubjectName] = useState("");
     const [subjectDescription, setSubjectDescription] = useState("");
 
     useEffect(() => {
-        if (user?.id !== sessionId) {
+        if (localStorage.getItem('sessionId') !== user?.id) {
             navigate(`/login`);
         }
-    }, [user, sessionId]);
+    }, [user]);
 
     const handleAddSubject = () => {
         setBlur(!blur);
@@ -48,7 +46,7 @@ export default function InitialPage() {
     }
 
     const handleSubjectClick = (subjectId: string) => {
-        navigate(`/${sessionId}/${subjectId}`);
+        navigate(`/${subjectId}/community`);
     }
 
     const handleDelete = (subjectId: string) => {
@@ -68,7 +66,7 @@ export default function InitialPage() {
             <div className='h-[100%] w-[100%] flex border-[1px] border-solid' style={{filter: !blur ? 'blur(0px)' : 'blur(6px)'}}>    
                 <div className="absolute top-[2.5%] left-[2.5%] w-[75%] grid grid-cols-5 grid-rows-4 gap-5">
                     {Object.entries(subjects).map(([subjectId, subject]) => (
-                        <div className="flex h-[200px] w-[200px] bg-gray-200 border-[1px] border-black">
+                        <div className="flex h-[200px] w-[200px] bg-gray-100 border-[1px] border-black">
                             <button onClick={() => handleSubjectClick(subjectId)} id={subjectId} className="h-[200px] w-[200px]">
                                 <h1>{subject.subjectName}</h1>
                             </button>

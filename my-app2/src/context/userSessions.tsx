@@ -24,11 +24,17 @@ export const SessionContext = createContext<SessionContextType>({
 
 export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem('sessionId');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const user: User = {
+        id: savedUser,
+        first_name: '',
+        last_name: '',
+        email: '',
+        image: ''
+      }
+      setUser(user);
     }
   }, []);
 

@@ -24,8 +24,8 @@ export default function Login() {
     }
 
     setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    navigate(`/${newUser.id}/initial`);
+    localStorage.setItem('sessionId', newUser.id);
+    navigate(`/initial`);
   }
 
   const handleLoginFailure = (error: any) => {

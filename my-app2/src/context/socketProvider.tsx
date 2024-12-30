@@ -14,6 +14,7 @@ export interface SocketContextType {
     sendSubject: (subject: subject) => void;
     sendMessageMain: (message: MessageMain) => void;
     sendMessageThread: (message: MessageThread) => void;
+    isReady: boolean;
 }
 
 export const useSocket = () => {
@@ -31,9 +32,22 @@ export const SocketProvider: React.FC<ProviderProps> = ({children}) => {
     const setThreadMessages = useSetRecoilState(threadMessagesAtom);
     const [subjects, setSubjects] = useRecoilState(subjectsAtom);
     const [mainMessages, setMainMessages] = useRecoilState(mainMessagesAtom);
-
+    const [isReady, setIsReady] = useState(false);
     console.log("atom subjects", subjects);
     console.log("atom mainMessages", mainMessages);
+    const [socket, setSocket] = useState<Socket | null>(null);
+
+    const sendSubject: SocketContextType["sendSubject"] = useCallback((subject: subject) => {
+        if (socket) socket.emit("event:subject", subject);
+    }, [socket]);
+
+    const sendMessageMain: SocketContextType["sendMessageMain"] = useCallback((message: MessageMain) => {
+        if (socket) socket.emit("event:messageMain", message);
+    }, [socket]);
+
+    const sendMessageThread: SocketContextType["sendMessageThread"] = useCallback((message: MessageThread) => {
+        if (socket) socket.emit("event:messageThread", message);
+    }, [socket]);
 
     const functionForMedia: (media: any) => Blob = (media: any) => {
         console.log("type of media", typeof media);
@@ -93,8 +107,6 @@ export const SocketProvider: React.FC<ProviderProps> = ({children}) => {
             return prevSubjects;
         });
 
-        // console.log("atom subjects", subjects);
-        // console.log("atom mainMessages", mainMessages);
     }
 
     const functionThread = (message: any) => {
@@ -123,20 +135,6 @@ export const SocketProvider: React.FC<ProviderProps> = ({children}) => {
         );
 
     }    
-
-    const [socket, setSocket] = useState<Socket | null>(null);
-
-    const sendSubject: SocketContextType["sendSubject"] = useCallback((subject: subject) => {
-        if (socket) socket.emit("event:subject", subject);
-    }, [socket]);
-
-    const sendMessageMain: SocketContextType["sendMessageMain"] = useCallback((message: MessageMain) => {
-        if (socket) socket.emit("event:messageMain", message);
-    }, [socket]);
-
-    const sendMessageThread: SocketContextType["sendMessageThread"] = useCallback((message: MessageThread) => {
-        if (socket) socket.emit("event:messageThread", message);
-    }, [socket]);
     
     const onMessageRec = (message: subject | MessageMain | MessageThread) => {
         console.log(message);
@@ -156,6 +154,7 @@ export const SocketProvider: React.FC<ProviderProps> = ({children}) => {
         const _socket = io('http://localhost:3000');
         _socket.on('event:message', onMessageRec);
         _socket.emit('event:getMessages', {message: "hello"});
+        console.log("[socketProvider]: socket message event:getMessages sent....");
         setSocket(_socket);
 
         return () => {
@@ -165,9 +164,13 @@ export const SocketProvider: React.FC<ProviderProps> = ({children}) => {
         };
     }, []);
 
+    useEffect(() => {
+        setTimeout(() => setIsReady(true), 5000); 
+    }, []);
+
     return (
-        <SocketContext.Provider value={{sendSubject, sendMessageMain, sendMessageThread}}>
-            {children}
+        <SocketContext.Provider value={{sendSubject, sendMessageMain, sendMessageThread, isReady}}>
+            {isReady ? children : <div>Loading...</div>}
         </SocketContext.Provider>
     )
 }
