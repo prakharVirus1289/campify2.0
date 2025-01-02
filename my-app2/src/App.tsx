@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import Thread from './thread/thread';
 import InitialPage from './pages/initialPage';
 import Profile from './pages/profile';
+import PrimaryFallback from './pages/PrimaryFallback';
 
 const clientId = "571515744262-babulumvica83kk8alpr0mbqmjqvk0uu.apps.googleusercontent.com";
 
@@ -26,6 +27,7 @@ const App: React.FC = () => {
   return (
     <div id="input-container" className="overflow-hidden bg-blue-50">
       <Routes>
+        <Route path="/" element={<PrimaryFallback/>} />
         <Route path="/:subjectId/input" element={<InputBox/>} />
         <Route path="/profile" element={<Profile/>}/>     
         <Route path="/login" element={<Login/>} />
